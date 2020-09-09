@@ -21,4 +21,4 @@ This is my **first post**.
 
 <h4>My Twitter Feed</h4>
 
-<a class="twitter-timeline" href="https://twitter.com/dwintermute16?ref_src=twsrc%5Etfw">Tweets by dwintermute16</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<embed type="text/html" src="/scripts/twitter_feed.html" width="640" height="360">
