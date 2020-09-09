@@ -14,150 +14,226 @@
     align-items: center;
     justify-content: center;
   }
-  canvas {
-    border: 1px solid white;
-  }
   </style>
 </head>
 <body>
-<canvas width="400" height="400" id="game"></canvas>
+<canvas width="400" height="500" id="game"></canvas>
 <script>
-var canvas = document.getElementById('game');
-var context = canvas.getContext('2d');
+const canvas = document.getElementById('game');
+const context = canvas.getContext('2d');
 
-var grid = 16;
-var count = 0;
-  
-var snake = {
-  x: 160,
-  y: 160,
-  
-  // snake velocity. moves one grid length every frame in either the x or y direction
-  dx: grid,
-  dy: 0,
-  
-  // keep track of all grids the snake body occupies
-  cells: [],
-  
-  // length of the snake. grows when eating an apple
-  maxCells: 4
-};
-var apple = {
-  x: 320,
-  y: 320
+// each row is 14 bricks long. the level consists of 6 blank rows then 8 rows
+// of 4 colors: red, orange, green, and yellow
+const level1 = [
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
+  ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
+  ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
+  ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
+  ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
+  ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
+  ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'],
+  ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y']
+];
+
+// create a mapping between color short code (R, O, G, Y) and color name
+const colorMap = {
+  'R': 'red',
+  'O': 'orange',
+  'G': 'green',
+  'Y': 'yellow'
 };
 
-// get random whole numbers in a specific range
-// @see https://stackoverflow.com/a/1527820/2124254
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
+// use a 2px gap between each brick
+const brickGap = 2;
+const brickWidth = 25;
+const brickHeight = 12;
+
+// the wall width takes up the remaining space of the canvas width. with 14 bricks
+// and 13 2px gaps between them, thats: 400 - (14 * 25 + 2 * 13) = 24px. so each
+// wall will be 12px
+const wallSize = 12;
+const bricks = [];
+
+// create the level by looping over each row and column in the level1 array
+// and creating an object with the bricks position (x, y) and color
+for (let row = 0; row < level1.length; row++) {
+  for (let col = 0; col < level1[row].length; col++) {
+    const colorCode = level1[row][col];
+
+    bricks.push({
+      x: wallSize + (brickWidth + brickGap) * col,
+      y: wallSize + (brickHeight + brickGap) * row,
+      color: colorMap[colorCode],
+      width: brickWidth,
+      height: brickHeight
+    });
+  }
+}
+
+const paddle = {
+  // place the paddle horizontally in the middle of the screen
+  x: canvas.width / 2 - brickWidth / 2,
+  y: 440,
+  width: brickWidth,
+  height: brickHeight,
+
+  // paddle x velocity
+  dx: 0
+};
+
+const ball = {
+  x: 130,
+  y: 260,
+  width: 5,
+  height: 5,
+
+  // how fast the ball should go in either the x or y direction
+  speed: 2,
+
+  // ball velocity
+  dx: 0,
+  dy: 0
+};
+
+// check for collision between two objects using axis-aligned bounding box (AABB)
+// @see https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+function collides(obj1, obj2) {
+  return obj1.x < obj2.x + obj2.width &&
+         obj1.x + obj1.width > obj2.x &&
+         obj1.y < obj2.y + obj2.height &&
+         obj1.y + obj1.height > obj2.y;
 }
 
 // game loop
 function loop() {
   requestAnimationFrame(loop);
-
-  // slow game loop to 15 fps instead of 60 (60/15 = 4)
-  if (++count < 4) {
-    return;
-  }
-
-  count = 0;
   context.clearRect(0,0,canvas.width,canvas.height);
 
-  // move snake by it's velocity
-  snake.x += snake.dx;
-  snake.y += snake.dy;
+  // move paddle by it's velocity
+  paddle.x += paddle.dx;
 
-  // wrap snake position horizontally on edge of screen
-  if (snake.x < 0) {
-    snake.x = canvas.width - grid;
+  // prevent paddle from going through walls
+  if (paddle.x < wallSize) {
+    paddle.x = wallSize
   }
-  else if (snake.x >= canvas.width) {
-    snake.x = 0;
-  }
-  
-  // wrap snake position vertically on edge of screen
-  if (snake.y < 0) {
-    snake.y = canvas.height - grid;
-  }
-  else if (snake.y >= canvas.height) {
-    snake.y = 0;
+  else if (paddle.x + brickWidth > canvas.width - wallSize) {
+    paddle.x = canvas.width - wallSize - brickWidth;
   }
 
-  // keep track of where snake has been. front of the array is always the head
-  snake.cells.unshift({x: snake.x, y: snake.y});
+  // move ball by it's velocity
+  ball.x += ball.dx;
+  ball.y += ball.dy;
 
-  // remove cells as we move away from them
-  if (snake.cells.length > snake.maxCells) {
-    snake.cells.pop();
+  // prevent ball from going through walls by changing its velocity
+  // left & right walls
+  if (ball.x < wallSize) {
+    ball.x = wallSize;
+    ball.dx *= -1;
+  }
+  else if (ball.x + ball.width > canvas.width - wallSize) {
+    ball.x = canvas.width - wallSize - ball.width;
+    ball.dx *= -1;
+  }
+  // top wall
+  if (ball.y < wallSize) {
+    ball.y = wallSize;
+    ball.dy *= -1;
   }
 
-  // draw apple
-  context.fillStyle = 'red';
-  context.fillRect(apple.x, apple.y, grid-1, grid-1);
+  // reset ball if it goes below the screen
+  if (ball.y > canvas.height) {
+    ball.x = 130;
+    ball.y = 260;
+    ball.dx = 0;
+    ball.dy = 0;
+  }
 
-  // draw snake one cell at a time
-  context.fillStyle = 'green';
-  snake.cells.forEach(function(cell, index) {
-    
-    // drawing 1 px smaller than the grid creates a grid effect in the snake body so you can see how long it is
-    context.fillRect(cell.x, cell.y, grid-1, grid-1);  
+  // check to see if ball collides with paddle. if they do change y velocity
+  if (collides(ball, paddle)) {
+    ball.dy *= -1;
 
-    // snake ate apple
-    if (cell.x === apple.x && cell.y === apple.y) {
-      snake.maxCells++;
+    // move ball above the paddle otherwise the collision will happen again
+    // in the next frame
+    ball.y = paddle.y - ball.height;
+  }
 
-      // canvas is 400x400 which is 25x25 grids 
-      apple.x = getRandomInt(0, 25) * grid;
-      apple.y = getRandomInt(0, 25) * grid;
-    }
+  // check to see if ball collides with a brick. if it does, remove the brick
+  // and change the ball velocity based on the side the brick was hit on
+  for (let i = 0; i < bricks.length; i++) {
+    const brick = bricks[i];
 
-    // check collision with all cells after this one (modified bubble sort)
-    for (var i = index + 1; i < snake.cells.length; i++) {
-      
-      // snake occupies same space as a body part. reset game
-      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-        snake.x = 160;
-        snake.y = 160;
-        snake.cells = [];
-        snake.maxCells = 4;
-        snake.dx = grid;
-        snake.dy = 0;
+    if (collides(ball, brick)) {
+      // remove brick from the bricks array
+      bricks.splice(i, 1);
 
-        apple.x = getRandomInt(0, 25) * grid;
-        apple.y = getRandomInt(0, 25) * grid;
+      // ball is above or below the brick, change y velocity
+      // account for the balls speed since it will be inside the brick when it
+      // collides
+      if (ball.y + ball.height - ball.speed <= brick.y ||
+          ball.y >= brick.y + brick.height - ball.speed) {
+        ball.dy *= -1;
       }
+      // ball is on either side of the brick, change x velocity
+      else {
+        ball.dx *= -1;
+      }
+
+      break;
     }
+  }
+
+  // draw walls
+  context.fillStyle = 'lightgrey';
+  context.fillRect(0, 0, canvas.width, wallSize);
+  context.fillRect(0, 0, wallSize, canvas.height);
+  context.fillRect(canvas.width - wallSize, 0, wallSize, canvas.height);
+
+  // draw ball if it's moving
+  if (ball.dx || ball.dy) {
+    context.fillRect(ball.x, ball.y, ball.width, ball.height);
+  }
+
+  // draw bricks
+  bricks.forEach(function(brick) {
+    context.fillStyle = brick.color;
+    context.fillRect(brick.x, brick.y, brick.width, brick.height);
   });
+
+  // draw paddle
+  context.fillStyle = 'cyan';
+  context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 }
 
-// listen to keyboard events to move the snake
+// listen to keyboard events to move the paddle
 document.addEventListener('keydown', function(e) {
-  // prevent snake from backtracking on itself by checking that it's 
-  // not already moving on the same axis (pressing left while moving
-  // left won't do anything, and pressing right while moving left
-  // shouldn't let you collide with your own body)
-  
   // left arrow key
-  if (e.which === 37 && snake.dx === 0) {
-    snake.dx = -grid;
-    snake.dy = 0;
-  }
-  // up arrow key
-  else if (e.which === 38 && snake.dy === 0) {
-    snake.dy = -grid;
-    snake.dx = 0;
+  if (e.which === 37) {
+    paddle.dx = -3;
   }
   // right arrow key
-  else if (e.which === 39 && snake.dx === 0) {
-    snake.dx = grid;
-    snake.dy = 0;
+  else if (e.which === 39) {
+    paddle.dx = 3;
   }
-  // down arrow key
-  else if (e.which === 40 && snake.dy === 0) {
-    snake.dy = grid;
-    snake.dx = 0;
+
+  // space key
+  // if they ball is not moving, we can launch the ball using the space key. ball
+  // will move towards the bottom right to start
+  if (ball.dx === 0 && ball.dy === 0 && e.which === 32) {
+    ball.dx = ball.speed;
+    ball.dy = ball.speed;
+  }
+});
+
+// listen to keyboard events to stop the paddle if key is released
+document.addEventListener('keyup', function(e) {
+  if (e.which === 37 || e.which === 39) {
+    paddle.dx = 0;
   }
 });
 
