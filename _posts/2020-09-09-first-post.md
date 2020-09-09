@@ -7,7 +7,7 @@ This is my **first post**.
 
 [Here's a website I like](https://youtu.be/dQw4w9WgXcQ)
 
-<h1>Enjoy a nice relaxing game</h1>
+<h1>Enjoy a nice relaxing game (press space for a new ball)</h1>
 
 <embed type="text/html" src="/scripts/breakout.html"  width="600" height="600">
 
