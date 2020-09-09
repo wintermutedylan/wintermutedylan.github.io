@@ -9,4 +9,4 @@ This is my **first post**.
 
 <h1>The embed element</h1>
 
-<embed type="text/html" src="snake.html"  width="500" height="500">
+<embed type="text/html" src="https://github.com/wintermutedylan/wintermutedylan.github.io/blob/master/snake.html"  width="500" height="500">
