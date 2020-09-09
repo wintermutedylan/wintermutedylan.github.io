@@ -18,3 +18,7 @@ This is my **first post**.
 <h3>Woof</h3>
 
 <embed type="video/webm" src="/videos/Woof.mp4" width="640" height="360">
+
+<h4>My Twitter Feed</h4>
+
+<a class="twitter-timeline" href="https://twitter.com/dwintermute16?ref_src=twsrc%5Etfw">Tweets by dwintermute16</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
