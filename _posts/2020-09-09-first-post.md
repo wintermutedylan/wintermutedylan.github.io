@@ -9,4 +9,4 @@ This is my **first post**.
 
 <h1>Enjoy a nice relaxing game</h1>
 
-<embed type="text/html" src="/breakout.html"  width="500" height="500">
+<embed type="text/html" src="/breakout.html"  width="600" height="600">
