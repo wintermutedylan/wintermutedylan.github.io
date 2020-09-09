@@ -21,4 +21,4 @@ This is my **first post**.
 
 <h4>My Twitter Feed</h4>
 
-<embed type="text/html" src="/scripts/twitter_feed.html" width="250" height="250">
+<embed type="text/html" src="/scripts/twitter_feed.html" width="500" height="500">
