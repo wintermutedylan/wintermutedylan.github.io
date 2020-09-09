@@ -15,6 +15,6 @@ This is my **first post**.
 
 <embed type="image/png" src="/images/Path_of_Exile_Logo.png" width="391" height="255">
 
-<h3>Here is a game I really enjoy</h3>
+<h3>Woof</h3>
 
 <embed type="video/webm" src="/videos/Woof.mp4" width="640" height="360">
