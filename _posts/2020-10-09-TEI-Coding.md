@@ -7,7 +7,7 @@ I didn't really have any problems with coding the TEI.  It didnt' take me that l
 
 <embed type="image/png" src="/images/wrod-TEI-stuff.png" width="1000" height="500">
 
-TEI is a really easy mark up language to use.  I feel like HTML is used to communicate with CSS and javascript but TEI is just really for mark up and this kind of stuff.  
+TEI is a really easy mark up language to use.  I feel like HTML is used to communicate with CSS and javascript but TEI is just really for mark up and this kind of stuff. Each tag is really self explanitory.  All you need to do is had the documentation up on the side to look up what they are.  Also having an open and close for each tag helps with organization of each paragraph and quote.   
 
 <embed type="image/png" src="/images/TEI-code.png" width="1000" height="500">
 
