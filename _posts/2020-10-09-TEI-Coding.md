@@ -9,3 +9,5 @@ I didn't really have any problems with coding the TEI.  It didnt' take me that l
 
 TEI is a really easy mark up language to use.  I feel like HTML is used to communicate with CSS and javascript but TEI is just really for mark up and this kind of stuff.  
 
+<embed type="image/png" src="/images/TEI-code.png" width="1000" height="500">
+
